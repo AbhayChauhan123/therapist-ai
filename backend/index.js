@@ -1,9 +1,11 @@
+// backend/index.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -16,9 +18,9 @@ app.get('/', (req, res) => {
 });
 
 // Chat endpoint
-const openai = new OpenAIApi(
-  new Configuration({ apiKey: process.env.OPENAI_API_KEY })
-);
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 app.post('/chat', async (req, res) => {
   const { prompt } = req.body;
@@ -27,11 +29,12 @@ app.post('/chat', async (req, res) => {
   }
 
   try {
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: prompt }],
     });
-    const answer = completion.data.choices[0].message.content;
+
+    const answer = completion.choices[0].message.content;
     res.json({ answer });
   } catch (err) {
     console.error('OpenAI error:', err);
